@@ -5,6 +5,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -66,28 +69,32 @@ fun MainScreen(
             item {
                 Column {
                     Text(text = "MnemonicCode", fontSize = 12.sp, color = Color.Black)
-                    Card(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .height(100.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        elevation = CardDefaults.elevatedCardElevation(
-                            defaultElevation = 3.dp
-                        ), onClick = {
+
+                    Box(modifier = modifier
+                        .fillMaxWidth()
+                        .clip(
+                            RoundedCornerShape(16.dp)
+                        )
+                        .background(Color.Gray.copy(0.3f))
+                        .height(100.dp)
+                        .clickable {
                             copyToClipboard(context = context, text = viewState.mnemonicCode)
-                            Toast.makeText( context ,"${viewState.mnemonicCode} Copy to ClipBoard!",Toast.LENGTH_SHORT).show()
-                        }
-                    ) {
-                        Box(modifier = modifier.fillMaxSize()) {
-                            Text(
-                                modifier = modifier
-                                    .align(Alignment.Center)
-                                    .padding(8.dp),
-                                text = viewState.mnemonicCode,
-                                fontSize = 12.sp,
-                                color = Color.Black
-                            )
-                        }
+                            Toast
+                                .makeText(
+                                    context,
+                                    "${viewState.mnemonicCode} Copy to ClipBoard!",
+                                    Toast.LENGTH_SHORT
+                                )
+                                .show()
+                        }) {
+                        Text(
+                            modifier = modifier
+                                .align(Alignment.Center)
+                                .padding(8.dp),
+                            text = viewState.mnemonicCode,
+                            fontSize = 12.sp,
+                            color = Color.Black
+                        )
                     }
                 }
 
@@ -95,27 +102,30 @@ fun MainScreen(
             item {
                 Column {
                     Text(text = "Address", fontSize = 12.sp, color = Color.Black)
-                    Card(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .height(100.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        elevation = CardDefaults.elevatedCardElevation(
-                            defaultElevation = 3.dp
-                        ), onClick = {
+                    Box(modifier = modifier
+                        .fillMaxWidth()
+                        .clip(
+                            RoundedCornerShape(16.dp)
+                        )
+                        .background(Color.Gray.copy(0.3f))
+                        .height(100.dp)
+                        .clickable {
                             copyToClipboard(context = context, text = viewState.walletAddress)
-                            Toast.makeText( context ,"${viewState.walletAddress} Copy to ClipBoard!",Toast.LENGTH_SHORT).show()
-                        }
-                    ) {
-                        Box(modifier = modifier.fillMaxSize()) {
-                            Text(
-                                modifier = modifier.align(Alignment.Center),
-                                text = viewState.walletAddress,
-                                fontSize = 12.sp,
-                                color = Color.Black
-                            )
+                            Toast
+                                .makeText(
+                                    context,
+                                    "${viewState.walletAddress} Copy to ClipBoard!",
+                                    Toast.LENGTH_SHORT
+                                )
+                                .show()
+                        }) {
+                        Text(
+                            modifier = modifier.align(Alignment.Center),
+                            text = viewState.walletAddress,
+                            fontSize = 12.sp,
+                            color = Color.Black
+                        )
 
-                        }
                     }
                 }
 
@@ -123,29 +133,32 @@ fun MainScreen(
             item {
                 Column {
                     Text(text = "Private Key", fontSize = 12.sp, color = Color.Black)
-                    Card(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .height(100.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        elevation = CardDefaults.elevatedCardElevation(
-                            defaultElevation = 3.dp
-                        ), onClick = {
+                    Box(modifier = modifier
+                        .fillMaxWidth()
+                        .clip(
+                            RoundedCornerShape(16.dp)
+                        )
+                        .background(Color.Gray.copy(0.3f))
+                        .height(100.dp)
+                        .clickable {
                             copyToClipboard(context = context, text = viewState.privayeKey)
-                            Toast.makeText( context ,"${viewState.privayeKey} Copy to ClipBoard!",Toast.LENGTH_SHORT).show()
-                        }
-                    ) {
-                        Box(modifier = modifier.fillMaxSize()) {
-                            Text(
-                                modifier = modifier
-                                    .align(Alignment.Center)
-                                    .padding(horizontal = 8.dp),
-                                text = viewState.privayeKey,
-                                fontSize = 12.sp,
-                                color = Color.Black
-                            )
+                            Toast
+                                .makeText(
+                                    context,
+                                    "${viewState.privayeKey} Copy to ClipBoard!",
+                                    Toast.LENGTH_SHORT
+                                )
+                                .show()
+                        }) {
+                        Text(
+                            modifier = modifier
+                                .align(Alignment.Center)
+                                .padding(horizontal = 8.dp),
+                            text = viewState.privayeKey,
+                            fontSize = 12.sp,
+                            color = Color.Black
+                        )
 
-                        }
                     }
                 }
 
