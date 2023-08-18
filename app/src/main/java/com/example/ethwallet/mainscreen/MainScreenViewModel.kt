@@ -1,7 +1,10 @@
 package com.example.ethwallet.mainscreen
 
+import androidx.lifecycle.viewModelScope
+import com.example.ethwallet.usecase.GenerateEthAddressFromMnemonicUseCase
 import com.example.ethwallet.utils.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.crypto.ChildNumber
 import org.bitcoinj.crypto.HDKeyDerivation
@@ -15,42 +18,51 @@ import java.security.SecureRandom
 import javax.inject.Inject
 
 @HiltViewModel
-class MainScreenViewModel @Inject constructor() : BaseViewModel<MainScreenState, MainScreenAction>(
+class MainScreenViewModel @Inject constructor(
+    private val generateEthAddressFromMnemonicUseCase: GenerateEthAddressFromMnemonicUseCase
+) : BaseViewModel<MainScreenState, MainScreenAction>(
     MainScreenState()
 ) {
 
     init {
         onEachAction { action ->
             when (action) {
-                is MainScreenAction.GenerateAddress -> {
-                    setState {
-                        copy(
-                            mnemonicCode = generateRandomMnemonic(),
-                            walletAddress = generateEthAddressFromMnemonic(generateRandomMnemonic()).first,
-                            privayeKey = generateEthAddressFromMnemonic(generateRandomMnemonic()).second
-                        )
-                    }
-                }
+                is MainScreenAction.GenerateAddress -> generateEthAddressFromMnemonic(
+                    generateRandomMnemonic()
+                )
 
                 else -> throw IllegalArgumentException("unknown action :$action")
             }
         }
+        onAsyncResult(
+            MainScreenState::generateAddressResponse,
+            onSuccess = {
+                setState {
+                    copy(
+                        walletAddress = it.first,
+                        privayeKey = it.second,
+                        mnemonicCode = generateRandomMnemonic()
+                    )
+                }
+            },
+            onFail = {
+                val response = it.message
+                println(response)
+            }
+        )
     }
 
+    private fun generateEthAddressFromMnemonic(mnemonic: String) {
+        viewModelScope.launch {
+            suspend {
+
+                generateEthAddressFromMnemonicUseCase(mnemonic)
+            }.execute {
+                copy(generateAddressResponse = it)
+            }
+        }
+    }
 }
-
-fun generateEthAddressFromMnemonic(mnemonic: String): Pair<String, String> {
-    val seedBytes = MnemonicUtils.generateSeed(mnemonic, "")
-    val masterKeyPair = HDKeyDerivation.createMasterPrivateKey(seedBytes)
-    val derivedKeyPair = HDKeyDerivation.deriveChildKey(masterKeyPair, ChildNumber.ZERO_HARDENED)
-
-    val privateKey = derivedKeyPair.privKeyBytes
-    val publicKey = ECKey.fromPrivate(privateKey).publicKeyAsHex
-
-    val address = Keys.getAddress(publicKey)
-    return Pair("0x$address", Numeric.toHexStringNoPrefix(privateKey))
-}
-
 fun generateRandomMnemonic(): String {
     val secureRandom = SecureRandom()
     val entropy = ByteArray(16) // 128 bits entropy for 12-word mnemonic
