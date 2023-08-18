@@ -4,5 +4,6 @@ import org.bitcoinj.crypto.MnemonicCode
 
 data class MainScreenState(
     val walletAddress:String ="",
-    val mnemonicCode: String = ""
+    val mnemonicCode: String = "",
+    val privayeKey :String = ""
 )

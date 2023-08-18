@@ -2,6 +2,7 @@ package com.example.ethwallet.mainscreen
 
 import com.example.ethwallet.utils.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import org.bitcoinj.core.ECKey
 import org.bitcoinj.crypto.ChildNumber
 import org.bitcoinj.crypto.HDKeyDerivation
 import org.bitcoinj.crypto.MnemonicCode
@@ -9,6 +10,7 @@ import org.bitcoinj.crypto.MnemonicException
 import org.web3j.crypto.ECKeyPair
 import org.web3j.crypto.Keys
 import org.web3j.crypto.MnemonicUtils
+import org.web3j.utils.Numeric
 import java.security.SecureRandom
 import javax.inject.Inject
 
@@ -24,7 +26,8 @@ class MainScreenViewModel @Inject constructor() : BaseViewModel<MainScreenState,
                     setState {
                         copy(
                             mnemonicCode = generateRandomMnemonic(),
-                            walletAddress = generateEthAddressFromMnemonic(generateRandomMnemonic())
+                            walletAddress = generateEthAddressFromMnemonic(generateRandomMnemonic()).first,
+                            privayeKey = generateEthAddressFromMnemonic(generateRandomMnemonic()).second
                         )
                     }
                 }
@@ -36,19 +39,16 @@ class MainScreenViewModel @Inject constructor() : BaseViewModel<MainScreenState,
 
 }
 
-fun generateEthAddressFromMnemonic(mnemonic: String): String {
-    val derivationPath = "m/44'/60'/0'/0" // Derivation path
-    val index = 0 // Address index
-
+fun generateEthAddressFromMnemonic(mnemonic: String): Pair<String, String> {
     val seedBytes = MnemonicUtils.generateSeed(mnemonic, "")
     val masterKeyPair = HDKeyDerivation.createMasterPrivateKey(seedBytes)
     val derivedKeyPair = HDKeyDerivation.deriveChildKey(masterKeyPair, ChildNumber.ZERO_HARDENED)
 
-    val privateKey = derivedKeyPair.privKey
-    val publicKey = ECKeyPair.create(privateKey).publicKey
+    val privateKey = derivedKeyPair.privKeyBytes
+    val publicKey = ECKey.fromPrivate(privateKey).publicKeyAsHex
 
     val address = Keys.getAddress(publicKey)
-    return "0x$address"
+    return Pair("0x$address", Numeric.toHexStringNoPrefix(privateKey))
 }
 
 fun generateRandomMnemonic(): String {
