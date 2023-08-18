@@ -1,6 +1,10 @@
 package com.example.ethwallet.mainscreen
 
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -22,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -41,6 +47,7 @@ fun MainScreen(navController: NavController) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen(
@@ -48,6 +55,7 @@ fun MainScreen(
     viewState: MainScreenState,
     action: (MainScreenAction) -> Unit
 ) {
+    val context = LocalContext.current
     Scaffold(modifier = modifier.fillMaxSize(), containerColor = Color.White, topBar = {
         Spacer(modifier = modifier.height(56.dp))
     }) {
@@ -65,11 +73,16 @@ fun MainScreen(
                         shape = RoundedCornerShape(16.dp),
                         elevation = CardDefaults.elevatedCardElevation(
                             defaultElevation = 3.dp
-                        )
+                        ), onClick = {
+                            copyToClipboard(context = context, text = viewState.mnemonicCode)
+                            Toast.makeText( context ,"${viewState.mnemonicCode} Copy to ClipBoard!",Toast.LENGTH_SHORT).show()
+                        }
                     ) {
                         Box(modifier = modifier.fillMaxSize()) {
                             Text(
-                                modifier = modifier.align(Alignment.Center).padding(8.dp),
+                                modifier = modifier
+                                    .align(Alignment.Center)
+                                    .padding(8.dp),
                                 text = viewState.mnemonicCode,
                                 fontSize = 12.sp,
                                 color = Color.Black
@@ -89,7 +102,10 @@ fun MainScreen(
                         shape = RoundedCornerShape(16.dp),
                         elevation = CardDefaults.elevatedCardElevation(
                             defaultElevation = 3.dp
-                        )
+                        ), onClick = {
+                            copyToClipboard(context = context, text = viewState.walletAddress)
+                            Toast.makeText( context ,"${viewState.walletAddress} Copy to ClipBoard!",Toast.LENGTH_SHORT).show()
+                        }
                     ) {
                         Box(modifier = modifier.fillMaxSize()) {
                             Text(
@@ -114,11 +130,16 @@ fun MainScreen(
                         shape = RoundedCornerShape(16.dp),
                         elevation = CardDefaults.elevatedCardElevation(
                             defaultElevation = 3.dp
-                        )
+                        ), onClick = {
+                            copyToClipboard(context = context, text = viewState.privayeKey)
+                            Toast.makeText( context ,"${viewState.privayeKey} Copy to ClipBoard!",Toast.LENGTH_SHORT).show()
+                        }
                     ) {
                         Box(modifier = modifier.fillMaxSize()) {
                             Text(
-                                modifier = modifier.align(Alignment.Center).padding(horizontal = 8.dp),
+                                modifier = modifier
+                                    .align(Alignment.Center)
+                                    .padding(horizontal = 8.dp),
                                 text = viewState.privayeKey,
                                 fontSize = 12.sp,
                                 color = Color.Black
@@ -137,4 +158,10 @@ fun MainScreen(
             }
         }
     }
+}
+
+fun copyToClipboard(context: Context, text: String) {
+    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    val clipData = ClipData.newPlainText("copy", text)
+    clipboardManager.setPrimaryClip(clipData)
 }
