@@ -104,6 +104,7 @@ fun MainScreen(
                 }
 
             }
+
             item {
                 TextButton(onClick = { action(MainScreenAction.GenerateAddress) }) {
                     Text(text = "Generate Address")
