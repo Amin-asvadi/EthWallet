@@ -104,6 +104,31 @@ fun MainScreen(
                 }
 
             }
+            item {
+                Column {
+                    Text(text = "Private Key", fontSize = 12.sp, color = Color.Black)
+                    Card(
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .height(100.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.elevatedCardElevation(
+                            defaultElevation = 3.dp
+                        )
+                    ) {
+                        Box(modifier = modifier.fillMaxSize()) {
+                            Text(
+                                modifier = modifier.align(Alignment.Center).padding(horizontal = 8.dp),
+                                text = viewState.privayeKey,
+                                fontSize = 12.sp,
+                                color = Color.Black
+                            )
+
+                        }
+                    }
+                }
+
+            }
 
             item {
                 TextButton(onClick = { action(MainScreenAction.GenerateAddress) }) {
