@@ -2,6 +2,7 @@ package com.example.ethwallet.mainscreen
 
 import androidx.lifecycle.viewModelScope
 import com.example.ethwallet.usecase.GenerateEthAddressFromMnemonicUseCase
+import com.example.ethwallet.usecase.MnemonicCodeGeneratorUseCase
 import com.example.ethwallet.utils.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -19,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainScreenViewModel @Inject constructor(
-    private val generateEthAddressFromMnemonicUseCase: GenerateEthAddressFromMnemonicUseCase
+    private val generateEthAddressFromMnemonicUseCase: GenerateEthAddressFromMnemonicUseCase,
+    private val mnemonicCodeGeneratorUseCase: MnemonicCodeGeneratorUseCase
 ) : BaseViewModel<MainScreenState, MainScreenAction>(
     MainScreenState()
 ) {
@@ -27,13 +29,22 @@ class MainScreenViewModel @Inject constructor(
     init {
         onEachAction { action ->
             when (action) {
-                is MainScreenAction.GenerateAddress -> generateEthAddressFromMnemonic(
-                    generateRandomMnemonic()
-                )
+                is MainScreenAction.GenerateAddress -> generateRandomMnemonic()
 
                 else -> throw IllegalArgumentException("unknown action :$action")
             }
         }
+        onAsyncResult(
+            MainScreenState::mnemonicCodeGeneratorResponse,
+            onSuccess = {
+                generateEthAddressFromMnemonic(it)
+                setState { copy(mnemonicCode = it) }
+            },
+            onFail = {
+                val response = it.message
+                println(response)
+            }
+        )
         onAsyncResult(
             MainScreenState::generateAddressResponse,
             onSuccess = {
@@ -41,7 +52,6 @@ class MainScreenViewModel @Inject constructor(
                     copy(
                         walletAddress = it.first,
                         privayeKey = it.second,
-                        mnemonicCode = generateRandomMnemonic()
                     )
                 }
             },
@@ -62,18 +72,15 @@ class MainScreenViewModel @Inject constructor(
             }
         }
     }
-}
-fun generateRandomMnemonic(): String {
-    val secureRandom = SecureRandom()
-    val entropy = ByteArray(16) // 128 bits entropy for 12-word mnemonic
 
-    secureRandom.nextBytes(entropy)
-
-    try {
-        val mnemonicCode = MnemonicCode.INSTANCE
-        val mnemonic = mnemonicCode.toMnemonic(entropy)
-        return mnemonic.joinToString(" ")
-    } catch (e: MnemonicException.MnemonicLengthException) {
-        throw RuntimeException("Error generating mnemonic", e)
+    private fun generateRandomMnemonic() {
+        viewModelScope.launch {
+            suspend {
+                mnemonicCodeGeneratorUseCase(Unit)
+            }.execute {
+                copy(mnemonicCodeGeneratorResponse = it)
+            }
+        }
     }
 }
+

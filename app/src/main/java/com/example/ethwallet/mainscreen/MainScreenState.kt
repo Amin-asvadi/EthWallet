@@ -8,4 +8,5 @@ data class MainScreenState(
     val mnemonicCode: String = "",
     val privayeKey :String = "",
     val generateAddressResponse: AsyncResult<Pair<String,String>> = Uninitialized,
+    val mnemonicCodeGeneratorResponse: AsyncResult<String> = Uninitialized,
 )
